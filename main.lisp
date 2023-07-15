@@ -9,9 +9,9 @@
 
 (defun filter-search-query (query)
   (let ((filtered-str ""))
-    (if (cl-ppcre:scan "https://" query)
+    (if (cl-ppcre:scan "http\(s\)*://" query)
         (setf filtered-str (cl-ppcre:scan-to-strings "\(?<=\\|\\s\).\+" query))
-        (setf filtered-str query))
+        (setf filtered-str query)) ; passthrough the untouched query, if it doesn't contain a link
     filtered-str))
 
 (defun save-query (query)
@@ -21,7 +21,7 @@
 
 (defun ssb-search (query)
   (let ((query-full (concatenate 'string *search-engine* (do-urlencode:urlencode query))))
-    (cond ((cl-ppcre:scan "https://" query)
+    (cond ((cl-ppcre:scan "http\(s\)*://" query)
            (uiop:run-program `(,*browser* ,query)))
           (t (if (equal *save-search?* t)
                  (save-query `(,query ,query-full))
